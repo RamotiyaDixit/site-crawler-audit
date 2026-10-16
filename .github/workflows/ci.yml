@@ -24,3 +24,12 @@ jobs:
         run: pytest -q
       - name: Offline demo
         run: python examples/run_demo.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t site-crawler-audit .
+      - name: Run offline demo in the container
+        run: docker run --rm site-crawler-audit demo
