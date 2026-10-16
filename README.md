@@ -1,12 +1,10 @@
-# optimitylogics-scraper
+# site-crawler-audit
 
-[![CI](https://github.com/OWNER/optimitylogics-scraper/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/optimitylogics-scraper/actions/workflows/ci.yml)
+[![CI](https://github.com/dixit2812/site-crawler-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/dixit2812/site-crawler-audit/actions/workflows/ci.yml)
 
 A polite, configurable crawler and data extractor for **optimitylogics.com**. It walks the site, pulls out structured data from every page, exports it as JSON, CSV and SQLite, and produces a Markdown SEO/content audit.
 
 Built for first-party use: auditing your own site, feeding its content into other tools, and keeping an eye on broken links and missing metadata.
-
-> Replace `OWNER` in the CI badge with your GitHub username after pushing.
 
 ## Features
 
@@ -21,8 +19,8 @@ Built for first-party use: auditing your own site, feeding its content into othe
 ## Quick start
 
 ```bash
-git clone https://github.com/OWNER/optimitylogics-scraper.git
-cd optimitylogics-scraper
+git clone https://github.com/dixit2812/site-crawler-audit.git
+cd site-crawler-audit
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
@@ -85,6 +83,35 @@ You can also run `python -m optimity_scraper ...` without installing the console
 | `--ignore-robots` | off | Skip `robots.txt` checks. Only use this on a site you own |
 | `-v` | off | Log every request |
 
+## Docker
+
+No local Python setup needed. Build the image once:
+
+```bash
+docker build -t site-crawler-audit .
+```
+
+Run the offline demo, or crawl a site and keep the results in `./output`:
+
+```bash
+docker run --rm site-crawler-audit demo
+
+mkdir -p output
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/output:/app/output" \
+  site-crawler-audit crawl --url https://optimitylogics.com --max-pages 100 --delay 1.5
+```
+
+`--user` makes the files in `output/` belong to you on Linux. It is not needed on Docker Desktop for Mac or Windows. Any command from the [command reference](#command-reference) works after the image name.
+
+With Docker Compose:
+
+```bash
+CRAWL_URL=https://optimitylogics.com docker compose run --rm crawler   # optional: MAX_PAGES, CRAWL_DELAY
+docker compose --profile demo run --rm demo                            # offline demo
+```
+
+Results are written to `./output` on your machine.
+
 ## Use it as a library
 
 ```python
@@ -120,7 +147,7 @@ src/optimity_scraper/
     demo.py       end-to-end offline demo
 examples/         demo runner, library example, sample_site/ fixture
 tests/            unit and integration tests
-scripts/          push_to_github.sh
+Dockerfile, docker-compose.yml
 ```
 
 ## Customising
@@ -140,22 +167,6 @@ The integration tests crawl the sample site through a real local HTTP server, so
 ## Responsible use
 
 This tool is meant for sites you own or have permission to crawl. Keep the default delay unless you know your hosting can take more, leave `robots.txt` handling on, and avoid running several crawls at once. If you point it at someone else's site, check their terms first.
-
-## Publish to GitHub
-
-With the [GitHub CLI](https://cli.github.com) installed:
-
-```bash
-scripts/push_to_github.sh                 # private repo named optimitylogics-scraper
-scripts/push_to_github.sh my-repo public  # custom name, public
-```
-
-The script logs you in if needed, commits any changes, creates the repository and pushes `main`. Manual alternative:
-
-```bash
-git init -b main && git add -A && git commit -m "Initial commit"
-gh repo create optimitylogics-scraper --private --source=. --remote=origin --push
-```
 
 ## License
 
