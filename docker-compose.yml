@@ -1,0 +1,23 @@
+services:
+  crawler:
+    build: .
+    image: site-crawler-audit
+    volumes:
+      - ./output:/app/output
+    # Usage: CRAWL_URL=https://example.com docker compose run --rm crawler
+    command:
+      - crawl
+      - --url
+      - ${CRAWL_URL:?set CRAWL_URL to the site you want to crawl}
+      - --max-pages
+      - ${MAX_PAGES:-100}
+      - --delay
+      - ${CRAWL_DELAY:-1.0}
+
+  demo:
+    build: .
+    image: site-crawler-audit
+    profiles: ["demo"]
+    volumes:
+      - ./output:/app/output
+    command: ["demo", "--output-dir", "output/demo"]
